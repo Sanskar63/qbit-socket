@@ -275,7 +275,8 @@ class QbitCityGameStateManager {
                 sinkInventory: 0,
                 energy: 0,
                 immunityActive: false,
-                immunityEndTime: 0
+                immunityEndTime: 0,
+                isDead: false
             });
         });
 
@@ -433,6 +434,7 @@ class QbitCityGameStateManager {
         player.immunityEndTime = 0;
         player.portalCooldown = 0;
         player.speed = BASE_PLAYER_SPEED;
+        player.isDead = false; // Reset death flag so player can die again
 
         // Clear input buffer for this player
         this.inputBuffers.delete(playerId);

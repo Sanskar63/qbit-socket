@@ -536,6 +536,9 @@ class QbitCityGameLoop {
             const gridX = Math.floor(player.x / TILE_SIZE);
             const gridY = Math.floor(player.y / TILE_SIZE);
             
+            // Skip dead players
+            if (player.isDead) return;
+            
             if (gridY >= 0 && gridY < MAP_HEIGHT && gridX >= 0 && gridX < MAP_WIDTH) {
                 const tile = gameState.map.tiles[gridY][gridX];
                 if (tile === 4) {
@@ -548,6 +551,8 @@ class QbitCityGameLoop {
                     });
                     
                     if (!onBoat) {
+                        // Mark player as dead to prevent multiple death events
+                        player.isDead = true;
                         // Player death from lava
                         this.io.to(gameState.roomCode).emit('player_death', {
                             playerId: player.id
@@ -561,12 +566,14 @@ class QbitCityGameLoop {
             gameState.enemies.forEach(enemy => {
                 const dist = Math.hypot(player.x - enemy.x, player.y - enemy.y);
                 if (dist < (player.width / 2 + enemy.width / 2)) {
-                    if (!player.immunityActive) {
+                    if (!player.immunityActive && !player.isDead) {
+                        // Mark player as dead to prevent multiple death events
+                        player.isDead = true;
                         // Player death - handled by game handler
                         this.io.to(gameState.roomCode).emit('player_death', {
                             playerId: player.id
                         });
-                    } else {
+                    } else if (player.immunityActive) {
                         // Push enemy away
                         const newPos = qbitCityGameStateManager.spawnEnemy(
                             gameState.map,
